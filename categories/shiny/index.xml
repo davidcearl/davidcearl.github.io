@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Shiny on endeavouRs</title>
+    <link>/categories/shiny/</link>
+    <description>Recent content in Shiny on endeavouRs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy;2017 David Earl</copyright>
+    <lastBuildDate>Mon, 02 Oct 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/categories/shiny/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>Shiny App Basics</title>
+      <link>/portfolio/shiny-app-basics/</link>
+      <pubDate>Mon, 02 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/portfolio/shiny-app-basics/</guid>
+      <description>Shiny is a package for making interactive R apps from RStudio.
+Shiny apps consist of three main components:
+a ui function
+a server function
+a call to shiny::runApp(ui = ui, server = server)The ui function returns genereated html for the apps user interface. Shiny has several built in ui functions with can be composed together to create the ui. These include functions for defining the layout of the app (e.</description>
+    </item>
+    
+  </channel>
+</rss>
