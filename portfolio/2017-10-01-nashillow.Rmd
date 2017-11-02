@@ -17,7 +17,8 @@ Ask any Nashvillian how the city is changing and they will tell you that it is g
 
 ## tl;dr
 
-Map of Nashville overlayed with a heatmap of the number of property sales by neighborhood.  Purple is lowest and yellow is hightest. 
+Map of Nashville overlayed with a heatmap of the number of property sales by neighborhood. Purple is lowest and yellow is highest.  
+
 ![](/img/portfolio/nashmap.jpg)
 
 ## To the Data!
