@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>DebarcodeR</title>
+<meta name="description" content="R and shiny based data analysis and projects">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="all,follow">
+<meta name="googlebot" content="index,follow,snippet,archive">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,300,700,400italic">
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/owl.carousel.css">
+<link rel="stylesheet" href="/css/owl.theme.css">
+
+
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+
+ 
+
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+
+<link href="/css/custom.css" rel="stylesheet">
+<link rel="shortcut icon" href="/img/favicon.png">
+
+
+</head>
+<body>
+  <div id="all">
+      <div class="container-fluid">
+          <div class="row row-offcanvas row-offcanvas-left">
+              <div id="sidebar" class="col-xs-6 col-sm-4 col-md-3 sidebar-offcanvas">
+  <div class="sidebar-content">
+    <h1 class="sidebar-heading"><a href="/">endeavouRs</a></h1>
+    
+      <p class="sidebar-p">I am a scientist and tinkerer currently based in Nashville</p>
+    
+    <ul class="sidebar-menu">
+      
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/about/">About</a></li>
+      
+    </ul>
+    <p class="social">
+  
+  
+  
+  
+  
+  <a href="mailto:davidcearl@gmail.com" data-animate-hover="pulse" class="email">
+    <i class="fa fa-envelope"></i>
+  </a>
+  
+  
+  <a href="full%20profile%20url%20in%20linkedin" data-animate-hover="pulse">
+    <i class="fa fa-linkedin"></i>
+  </a>
+  
+  
+  
+  <a href="https://github.com/davidcearl/" data-animate-hover="pulse">
+    <i class="fa fa-github"></i>
+  </a>
+  
+</p>
+
+
+    <div class="copyright">
+      <p class="credit">
+        
+          &copy;2017 David Earl
+          
+      </p>
+    </div>
+  </div>
+  <div class="attribution">
+    <p class='creators'>
+      Template by <a href="https://bootstrapious.com/free-templates" class="external">Bootstrapious.com</a>
+<br>
+
+Ported to Hugo by <a href="https://github.com/kishaningithub">Kishan B</a>
+
+    </p>
+  </div>
+</div>
+
+
+
+              
+<div class="col-xs-12 col-sm-8 col-md-9 content-column white-background">
+  <div class="small-navbar visible-xs">
+  <button type="button" data-toggle="offcanvas" class="btn btn-ghost pull-left"> <i class="fa fa-align-left"> </i>Menu</button>
+  <h1 class="small-navbar-heading"><a href="/">endeavouRs</a></h1>
+</div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="content-column-content">
+         <h1>DebarcodeR</h1>
+         <p><strong>Intro</strong></p>
+<p>Our lab is developing tools to analyze patient specific effects of potential new chemotherapies using biopsy samples from patients being treated at Vanderbilt. This raises two challenges:</p>
+<ol style="list-style-type: decimal">
+<li>How do we obtain the maximal amount of information from these precious samples?</li>
+<li>How do we handle sample heterogeneity?</li>
+</ol>
+<p>To address the first issue we are using flow and mass cytometry which can measure dozens to hundreds of biomarkers on millions of single cells in a single run. Also we use a sample barcoding strategy that allows us to perform multiple sub-experiments on each sample. However the samples contains cells of varying size and type which are labeled with the barcode with varying efficiency. To address this problem and to automate the process of de-barcoding the data we are developing DebarcodeR, an R package that allows users to correct for cellular variability in their barcoded data using multiple regression and classify each barcoded data point using mixture modeling. DebarcodeR currently can be run as a Shiny app using local files or using the Cytobank API.</p>
+<p><strong>App layout</strong></p>
+<p>DebarcodeR functionality is split over 6 modules. The setup module allows the user to select what mode they want to run the app in and load their experiment. If API mode is chosen the user can enter their API token and DebarcodeR will fetch experiments from Cytobank. The setup module returns a reactive experiment object that is passed to the fcb_select module. The experiment object contains the experiment data loaded into <code>flowCore</code> flow frames and additional experimental information. The fcb_select module lets the user specify how their data is barcoded and the cellular populations they want to debarcode. The fcb_select module returns data frames to be used for regression and population classification by the DebarcodeR module. The last three modules allow the classified datasets to be split into separate files and uploaded to Cytobank for further analysis.</p>
+<pre class="r"><code>server &lt;- function(input, output, session) {
+
+  setup &lt;- callModule(setup, &#39;setup&#39;)
+
+  fcb &lt;- callModule(fcb_select, &#39;fcb_select&#39;, setup)
+
+  debarcoded &lt;- callModule(run_DebarcodeR, &#39;run_db&#39;, fcb)
+
+  callModule(assign_split, &#39;assign_split&#39;, setup, fcb, debarcoded)
+
+  upload_id &lt;- callModule(upload, &#39;upload&#39;, setup)
+
+  sample_tag &lt;- callModule(sample_tag, &#39;sample_tag&#39;, setup, upload_id)
+
+}</code></pre>
+<p><strong>Demo</strong></p>
+<p>DebarcodeR has a demo mode and example datasets which will be walked through below to illustrate how the Shiny app can be used. If you want try the app yourself the latest version is hosted on <a href="https://vlbs.shinyapps.io/debarcoder2">shinyapps.io/</a></p>
+<p><strong>Tab 1</strong></p>
+<p>On the first tab select demo from the Select mode drop down menu. Then click run demo to load the example experiment before proceeding to the second tab.</p>
+<hr />
+<div class="figure">
+<img src="/img/portfolio/setup.png" />
+
+</div>
+<hr />
+<p><strong>Tab 2</strong></p>
+<p>In the FCB File menu make sure Jurkat_48x_FCB2_timeslice is selected (FCB stands for fluorescent cell barcode). The FCB population menu is used to choose from any gated populations that were defined on Cytobank prior to importing the experiment. Similarly the Comp Matrix drop down allows you to specify a specific compensation matrix to use. The final two inputs that must be set are the BC1 channel and BC2 channel. In the example experiment the Pacific Orange and Pacific Blue channels were used to encode the barcoding information. Clicking the Done button returns a plot of all measured cells that meet the specified criteria. You can then use the cutoff sliders to exclude noisy data points. After adjusting the cutoffs click the Done button again and proceed to the third tab.</p>
+<hr />
+<div class="figure">
+<img src="/img/portfolio/debarcode_1.png" />
+
+</div>
+<hr />
+<p><strong>Tab 3</strong></p>
+<p>On the debarcode tab you can specify the number of levels in each barcode channel as well a set a cutoff to only classify a data point to a level that excedes a certain confidence level. Clicking Run DebarcodeR on BC1 will first perform the regression correction and then fit the levels as a mixture of skew normal distributions and assign cells to the modeled distribution under which it falls. In the case of very large data sets a subset of data points can be used to fit the model for improved performance.</p>
+<hr />
+<div class="figure">
+<img src="/img/portfolio/debarcode_2.png" />
+
+</div>
+<hr />
+<p>After the modeling is finished a histogram plot of the fit is returned as well as a plot of BC1 (in this case Pacific Orange) vs. SSC (cell size) with each cellular data point colored by the assigned label. As you can see the points between barcoded sub-populations that did not meet the uncertainty cutoff are classified as level 0.</p>
+<hr />
+<div class="figure">
+<img src="/img/portfolio/debarcode_3.png" />
+
+</div>
+<hr />
+<p>After DebarcodeR has finished BC1, select the number of levels that should be present in BC2 (8 levels of Pacific Blue in the example data), set the uncertainty cutoff and then click Run DebarcodR on BC2. This should run very quickly as many of the parameters learned from fitting BC1 can be reused. Plots of for each BC1 level are returned again with cellular data points colored by the assigned BC2 level. At this point you can proceed to tab 4.</p>
+<hr />
+<div class="figure">
+<img src="/img/portfolio/debarcode_4.png" />
+
+</div>
+<hr />
+<p><strong>Tab 4</strong></p>
+<p>DebarcodeR assumes that the experiment was performed on multi-well plates where each well corresponds to a unique experiment condition and each well has a unique combination of barcode levels. You can specify the layout of the barcode using the drop down menus which will then be used to match debarcoded data points to the well from which they originated. At this point you can split and write each debarcoded population to its own fcs file compatible with Cytobank or download a csv file with classification labels for each data point.</p>
+<hr />
+<div class="figure">
+<img src="/img/portfolio/assign.png" />
+
+</div>
+
+         
+      </div>
+    </div>
+  </div>
+</div>
+
+          </div>
+      </div>
+  </div>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/jquery.cookie.js"> </script>
+<script src="/js/ekko-lightbox.js"></script>
+<script src="/js/jquery.scrollTo.min.js"></script>
+<script src="/js/masonry.pkgd.min.js"></script>
+<script src="/js/imagesloaded.pkgd.min.js"></script>
+<script src="/js/owl.carousel.min.js"></script>
+<script src="/js/front.js"></script>
+
+</body>
+</html>

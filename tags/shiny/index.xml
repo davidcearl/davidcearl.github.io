@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes" ?>
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+  <channel>
+    <title>Shiny on endeavouRs</title>
+    <link>/tags/shiny/</link>
+    <description>Recent content in Shiny on endeavouRs</description>
+    <generator>Hugo -- gohugo.io</generator>
+    <language>en-us</language>
+    <copyright>&amp;copy;2017 David Earl</copyright>
+    <lastBuildDate>Sun, 01 Oct 2017 00:00:00 +0000</lastBuildDate>
+    
+	<atom:link href="/tags/shiny/index.xml" rel="self" type="application/rss+xml" />
+    
+    
+    <item>
+      <title>DebarcodeR</title>
+      <link>/portfolio/debarcoder/</link>
+      <pubDate>Sun, 01 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/portfolio/debarcoder/</guid>
+      <description>Intro
+Our lab is developing tools to analyze patient specific effects of potential new chemotherapies using biopsy samples from patients being treated at Vanderbilt. This raises two challenges:
+How do we obtain the maximal amount of information from these precious samples?How do we handle sample heterogeneity?To address the first issue we are using flow and mass cytometry which can measure dozens to hundreds of biomarkers on millions of single cells in a single run.</description>
+    </item>
+    
+  </channel>
+</rss>

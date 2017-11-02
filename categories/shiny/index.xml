@@ -13,6 +13,17 @@
     
     
     <item>
+      <title>DebarcodeR</title>
+      <link>/portfolio/debarcoder/</link>
+      <pubDate>Sun, 01 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/portfolio/debarcoder/</guid>
+      <description>Intro
+Our lab is developing tools to analyze patient specific effects of potential new chemotherapies using biopsy samples from patients being treated at Vanderbilt. This raises two challenges:
+How do we obtain the maximal amount of information from these precious samples?How do we handle sample heterogeneity?To address the first issue we are using flow and mass cytometry which can measure dozens to hundreds of biomarkers on millions of single cells in a single run.</description>
+    </item>
+    
+    <item>
       <title>Shiny modules all the way down</title>
       <link>/portfolio/shiny-modules-all-the-way-down/</link>
       <pubDate>Sun, 01 Oct 2017 00:00:00 +0000</pubDate>
