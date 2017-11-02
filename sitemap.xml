@@ -18,6 +18,11 @@
   </url>
   
   <url>
+    <loc>/portfolio/nashillow/</loc>
+    <lastmod>2017-10-01T00:00:00+00:00</lastmod>
+  </url>
+  
+  <url>
     <loc>/portfolio/shiny-module-basics/</loc>
     <lastmod>2017-10-15T00:00:00+00:00</lastmod>
   </url>
@@ -50,13 +55,13 @@
   </url>
   
   <url>
-    <loc>/tags/shiny/</loc>
+    <loc>/categories/shiny/</loc>
     <lastmod>2017-10-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
   
   <url>
-    <loc>/categories/shiny/</loc>
+    <loc>/tags/shiny/</loc>
     <lastmod>2017-10-01T00:00:00+00:00</lastmod>
     <priority>0</priority>
   </url>
