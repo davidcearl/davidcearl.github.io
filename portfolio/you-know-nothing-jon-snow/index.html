@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>You Know Nothing Jon Snow</title>
+<meta name="description" content="R and shiny based data analysis and projects">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="all,follow">
+<meta name="googlebot" content="index,follow,snippet,archive">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,300,700,400italic">
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/owl.carousel.css">
+<link rel="stylesheet" href="/css/owl.theme.css">
+
+
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+
+ 
+
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+
+<link href="/css/custom.css" rel="stylesheet">
+<link rel="shortcut icon" href="/img/favicon.png">
+
+
+</head>
+<body>
+  <div id="all">
+      <div class="container-fluid">
+          <div class="row row-offcanvas row-offcanvas-left">
+              <div id="sidebar" class="col-xs-6 col-sm-4 col-md-3 sidebar-offcanvas">
+  <div class="sidebar-content">
+    <h1 class="sidebar-heading"><a href="/">endeavouRs</a></h1>
+    
+      <p class="sidebar-p">I am a scientist and tinkerer currently based in Nashville</p>
+    
+    <ul class="sidebar-menu">
+      
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/about/">About</a></li>
+      
+    </ul>
+    <p class="social">
+  
+  
+  
+  
+  
+  <a href="mailto:davidcearl@gmail.com" data-animate-hover="pulse" class="email">
+    <i class="fa fa-envelope"></i>
+  </a>
+  
+  
+  <a href="full%20profile%20url%20in%20linkedin" data-animate-hover="pulse">
+    <i class="fa fa-linkedin"></i>
+  </a>
+  
+  
+  
+  <a href="https://github.com/davidcearl/" data-animate-hover="pulse">
+    <i class="fa fa-github"></i>
+  </a>
+  
+</p>
+
+
+    <div class="copyright">
+      <p class="credit">
+        
+          &copy;2017 David Earl
+          
+      </p>
+    </div>
+  </div>
+  <div class="attribution">
+    <p class='creators'>
+      Template by <a href="https://bootstrapious.com/free-templates" class="external">Bootstrapious.com</a>
+<br>
+
+Ported to Hugo by <a href="https://github.com/kishaningithub">Kishan B</a>
+
+    </p>
+  </div>
+</div>
+
+
+
+              
+<div class="col-xs-12 col-sm-8 col-md-9 content-column white-background">
+  <div class="small-navbar visible-xs">
+  <button type="button" data-toggle="offcanvas" class="btn btn-ghost pull-left"> <i class="fa fa-align-left"> </i>Menu</button>
+  <h1 class="small-navbar-heading"><a href="/">endeavouRs</a></h1>
+</div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="content-column-content">
+         <h1>You Know Nothing Jon Snow</h1>
+         <p><strong>Intro</strong></p>
+<p>The world created by George R. R. Martin in the Song of Ice and Fire series is full of warring factions and complex relationships between characters. This analysis attempts to build a network graph of the world from the raw text of the books with no foreknowledge of the plot or characters.</p>
+<p><strong>Getting Started</strong></p>
+<p>Each book was exported from an ebook reader as a plain text file. The table of contents, introduction, and appendixes were removed and extra white space was trimmed. The books were then read in and collapsed into a single character string.</p>
+<pre class="r"><code>load_books &lt;- function(text_dir = &#39;.&#39;, encoding = &#39;ANSI&#39;) {
+  books &lt;- c()
+  for (text in list.files(text_dir)) {
+    books[[text]] &lt;- readLines(paste0(text_dir, text), encoding = encoding)
+  }
+  return(books)
+}
+
+collapse_books &lt;- function(books) {
+  for (book in seq(books)) {
+    books[[book]] &lt;- paste(books[[book]], sep = &#39;&#39;, collapse = &#39;&#39;)
+  }
+  return(paste(books, collapse = &#39;&#39;))
+}
+
+books &lt;- load_books(&#39;./texts/&#39;)
+books &lt;- collapse_books(books)</code></pre>
+<p>Next, taking advantage of the structure of dialog I first tried identifying characters by finding capitalized words that appear after end quotes <code>”</code> using the regular expressions <code>'” [A-Z][a-z]+'</code>.</p>
+<p>After some testing on some sample text this approach looks promising. However, it looks like full names are being truncated.</p>
+<p><code>[1] &quot;Gared&quot;  &quot;Ser&quot;  &quot;Royce&quot;  &quot;Gared&quot;  &quot;Royce&quot;  &quot;Gared&quot;</code></p>
+<p>Expanding the number of time the pattern is matched returns titles and full names. Also one of the people groups in the books use ‘kh’ to indicate proper nouns so the pattern will be adjusted to account for those cases as well. <code>'” (([A-Z]|kh)[a-z]+ ){1,3}'</code></p>
+<p><code>[1] &quot;Gared&quot;  &quot;Ser Waymar Royce&quot;  &quot;Royce&quot; &quot;Gared&quot; &quot;Royce&quot;</code></p>
+<p>While the <code>stringr</code> package is awesome and typically more convenient, I’ve found the base R string functions are more forgiving when dealing with text sources not encoded in UTF-8. The function below uses <code>gregexpr</code> and <code>substr</code> to extract strings matching the regex pattern and returns a character vector. It also stores the position of the match using the names attribute of the vector and can filter out stopwords to simplify later analysis.</p>
+<pre class="r"><code>extract_pattern &lt;- function(string,
+                            pattern = &quot;” (([A-Z]|kh)[a-z]+ ){1,3}&quot;,
+                            offset_start = 2,
+                            offset_end = 2,
+                            stopwords = NULL) {
+  matches &lt;- gregexpr(pattern, string)
+  match_lengths &lt;- attributes(matches[[1]])$match.length
+  matches &lt;- unlist(matches)
+  extracted &lt;- c()
+  for (i in seq(matches)) {
+    match_str &lt;- substr(x = string, 
+                        start = matches[i] + offset_start,
+                        stop = matches[i] + match_lengths[[i]] - offset_end)
+    if (!tolower(match_str) %in% stopwords) {
+       extracted[[paste(matches[i])]] &lt;-  match_str
+     }
+  }
+  return(extracted)
+}
+
+extra_stopwords &lt;- c(&#39;none&#39;, &#39;one&#39;, &#39;sometimes&#39;, &#39;must&#39;,
+                     &#39;still&#39;, &#39;another&#39;, &#39;better&#39;, &#39;yet&#39;,
+                     &#39;together&#39;, &#39;though&#39;, &#39;perhaps&#39;, &#39;unless&#39;, &#39;maybe&#39;,
+                     &#39;worse&#39;, &#39;whenever&#39;, &#39;even&#39;, &#39;oh&#39;, &#39;&#39;)
+
+stopwords &lt;- c(tm::stopwords(), extra_stopwords)
+
+speakers &lt;- extract_pattern(books, stopwords = stopwords)
+head(sort(table(speakers), decreasing = T), 50)</code></pre>
+<p>Spot checking with <code>table</code> higlights a few issues. First proper titles and last names are causing there to be multiple entries for a single character so I will want to combine them by using standard names.</p>
+<pre class="r"><code>titles &lt;- c(&#39;Captain&#39;, &#39;Grand&#39;, &#39;Khal&#39;, &#39;King&#39;, &#39;Lady&#39;,&#39;Lord&#39;,
+            &#39;Maester&#39;, &#39;Magister&#39;, &#39;Prince&#39;, &#39;Princess&#39;, &#39;Queen&#39;,
+            &#39;Septa&#39;, &#39;Ser&#39;)
+
+swap_to &lt;- c(&#39;Jon&#39;, &#39;Sam&#39;, &#39;Dany&#39;, &#39;Ned&#39;, &#39;Mance Rayder&#39;,
+             &#39;Meera&#39;, &#39;Mirri Maz Duur&#39;, &#39;Lysa&#39;)
+
+swap_from &lt;- c(&#39;Jon Snow&#39;, &#39;Samwell Tarly&#39;, &#39;Daenerys&#39;, &#39;Eddard Stark&#39;, 
+               &#39;Mance&#39;, &#39;Meera Reed&#39;, &#39;Mirri&#39;, &#39;Lysa Arryn&#39;)
+
+clean_speakers &lt;- function(speakers, titles, swap_to, swap_from) {
+  speakers &lt;- gsub(paste(titles, collapse = &#39;|&#39;), &quot;&quot;, speakers)
+  speakers &lt;- trimws(speakers)
+  for (i in seq(swap_to)) {
+    speakers[which(speakers == swap_from[i])] &lt;- swap_to[i]
+  }
+  return(speakers)
+}
+
+cl_speakers &lt;- clean_speakers(speakers, titles = titles, 
+                           swap_to = swap_to, swap_from = swap_from)
+
+head(sort(table(cl_speakers), decreasing = T), 50)</code></pre>
+<p>Next the parsed dialogue can be used to build simple network representations. Each character who appears as speaker will be a node and edges will be defined for each character they spoke before and weighted by the number of times they spoke before the other character. I also want to filter out minor characters and interactions. I will be using the <code>igraph</code> package which can build a network object from a data.frame of nodes and other attributes.</p>
+<pre class="r"><code>node_df &lt;- function(speakers, min_edges = 3, min_edge_weight = 2) {
+  people &lt;- unique(speakers)
+  spoke_before &lt;- list()
+  for (person in people) {
+    if (length(which(speakers == person)) &gt; min_edges) {
+      tbl &lt;- table(speakers[which(speakers == person)+1])
+      df &lt;- as.data.frame(tbl[tbl &gt; min_edge_weight])
+      if (nrow(df) &gt; min_edges) {
+        df$person &lt;- person
+        df &lt;- df[c(3,1,2)]
+        names(df) &lt;- c(&#39;node1&#39;, &#39;node2&#39;, &#39;weight&#39;)
+        spoke_before[[person]] &lt;- df
+      }
+    }
+  }
+  return(dplyr::bind_rows(spoke_before))
+}
+
+build_network_graph &lt;- function(node_df, dim = 3, niter = 2500) {
+  net &lt;- igraph::graph_from_data_frame(node_df)
+  net &lt;- igraph::simplify(net, remove.multiple = F)
+  lay &lt;- igraph::layout_with_fr(net, dim = dim, niter = niter)
+  return(list(&#39;network&#39; = net, &#39;layout&#39; = lay))
+}
+
+speaker_nodes &lt;- node_df(cl_speakers)
+network &lt;- build_network_graph(speaker_nodes)</code></pre>
+<pre class="r"><code>net &lt;- network[[&#39;network&#39;]]
+
+lay &lt;- network[[&#39;layout&#39;]]
+
+char_names &lt;- igraph::vertex_attr(net)$name
+
+node_size &lt;- sapply(igraph::V(net)$name, function(x) {
+  length(igraph::E(net)[from(x)]) + 1
+}) 
+
+edge_weights &lt;- igraph::edge_attr(net)$weight
+
+norm_edge_weights &lt;- round(edge_weights/max(edge_weights), 1)
+
+edges &lt;- igraph::get.edges(net, igraph::E(net))
+
+xs &lt;- c()
+ys &lt;- c()
+zs &lt;- c()
+for (i in seq(nrow(edges))) {
+  xs &lt;- c(xs, lay[edges[i,1],1], lay[edges[i,2],1], NA)
+  ys &lt;- c(ys, lay[edges[i,1],2], lay[edges[i,2],2], NA)
+  zs &lt;- c(zs, lay[edges[i,1],3], lay[edges[i,2],3], NA)
+}
+
+rep_weights &lt;- unlist(lapply(norm_edge_weights, rep, 3))
+
+blues &lt;- which(rep_weights %in% c(0.3, 0.4, 0.5))
+purples &lt;- which(rep_weights %in% c(0.6, 0.7, 0.8))
+reds &lt;- which(rep_weights %in% c(0.9, 1))
+not_greys &lt;- c(blues, purples, reds)</code></pre>
+<pre class="r"><code>library(plotly)
+plot_ly(x = xs[-not_greys], 
+        y = ys[-not_greys], 
+        z = zs[-not_greys], 
+        type = &#39;scatter3d&#39;,
+        hoverinfo = &#39;none&#39;,
+        mode = &#39;lines&#39;, 
+        line = list(color = &#39;grey&#39;,
+                    width = 1)
+        ) %&gt;%
+  add_trace(x = xs[blues],
+            y = ys[blues],
+            z = zs[blues], 
+            mode = &#39;lines&#39;, 
+            line = list(color = &#39;blue&#39;, 
+                         width = 3)
+            ) %&gt;%
+  add_trace(x = xs[purples], 
+            y = ys[purples], 
+            z = zs[purples], 
+            mode = &#39;lines&#39;, 
+            line = list(color = &#39;green&#39;,
+                         width = 4)
+            ) %&gt;%
+  add_trace(x = xs[reds], 
+            y = ys[reds],
+            z = zs[reds], 
+            mode = &#39;lines&#39;, 
+            line = list(color = &#39;red&#39;, 
+                         width = 5)
+            ) %&gt;%
+  add_trace(x = lay[,1], 
+            y = lay[,2], 
+            z = lay[,3],
+            mode = &#39;lines+markers&#39;,
+            text = char_names,
+            textposition = &#39;topleft&#39;,
+            textfont = list(family = &#39;arial&#39;, size = 10),
+            hoverinfo = &#39;text&#39;,
+            marker = list(size = node_size, 
+                          color = &#39;orange&#39;, 
+                          sizemin = 10))</code></pre>
+<div class="figure">
+<img src="/img/portfolio/overview_got_plot.png" />
+
+</div>
+<p><strong>Zooming in on Dany</strong></p>
+<p>Dany has very few connections to other characters from Westeros increasing the distance between her node and the other main characters. She is surrounded by mainly Dothraki and Jorah is her closest companion.</p>
+<div class="figure">
+<img src="/img/portfolio/dany_zoom.png" />
+
+</div>
+<p><strong>Zooming in on Jon</strong></p>
+<p>We can see that Jon’s closest relationship is with Sam followed by Stannis, Maester Aemon, and the Wildlings Tormund and Ygritte which are unique connections to Jon.</p>
+<div class="figure">
+<img src="/img/portfolio/jon_zoom.png" />
+
+</div>
+<p><strong>Zooming in on Tyrion</strong></p>
+<p>Tyrion is deeply embroiled in the intrigue of King’s Landing with his closest confidant being Bronn. The fact that all three Lannister siblings play a central role in the books is reflected by their node sizes. Interestingly Lord Tywin speaks with Tyrion the most often despite his preference for Jaime and Cersei. We also can see that the Starks are the family most affected by the turmoil in Westeros with nodes dispersed all over the network graph and that Catelyn is separated from her daughters Sansa and Arya.</p>
+<div class="figure">
+<img src="/img/portfolio/tyrion_zoom.png" />
+
+</div>
+
+         
+      </div>
+    </div>
+  </div>
+</div>
+
+          </div>
+      </div>
+  </div>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/jquery.cookie.js"> </script>
+<script src="/js/ekko-lightbox.js"></script>
+<script src="/js/jquery.scrollTo.min.js"></script>
+<script src="/js/masonry.pkgd.min.js"></script>
+<script src="/js/imagesloaded.pkgd.min.js"></script>
+<script src="/js/owl.carousel.min.js"></script>
+<script src="/js/front.js"></script>
+
+</body>
+</html>

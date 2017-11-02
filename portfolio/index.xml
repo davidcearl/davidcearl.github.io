@@ -33,6 +33,18 @@ How do we obtain the maximal amount of information from these precious samples?
     </item>
     
     <item>
+      <title>You Know Nothing Jon Snow</title>
+      <link>/portfolio/you-know-nothing-jon-snow/</link>
+      <pubDate>Sun, 01 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/portfolio/you-know-nothing-jon-snow/</guid>
+      <description>Intro
+The world created by George R. R. Martin in the Song of Ice and Fire series is full of warring factions and complex relationships between characters. This analysis attempts to build a network graph of the world from the raw text of the books with no foreknowledge of the plot or characters.
+Getting Started
+Each book was exported from an ebook reader as a plain text file. The table of contents, introduction, and appendixes were removed and extra white space was trimmed.</description>
+    </item>
+    
+    <item>
       <title>Shiny Module Basics</title>
       <link>/portfolio/shiny-module-basics/</link>
       <pubDate>Sun, 15 Oct 2017 00:00:00 +0000</pubDate>

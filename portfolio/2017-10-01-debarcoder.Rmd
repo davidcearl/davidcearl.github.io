@@ -30,10 +30,11 @@ experiment data loaded into `flowCore` flow frames and additional experimental
 information. The fcb_select module lets the user specify how their data is
 barcoded and the cellular populations they want to debarcode. The fcb_select 
 module returns data frames to be used for regression and population classification 
-by the DebarcodeR module. The last three modules allow the classified datasets
+by the run_DebarcodeR module. The last three modules allow the classified datasets
 to be split into separate files and uploaded to Cytobank for further analysis.
 
 ```{r eval=FALSE}
+# main shiny server function
 server <- function(input, output, session) {
 
   setup <- callModule(setup, 'setup')
@@ -73,7 +74,7 @@ to load the example experiment before proceeding to the second tab.
 In the FCB File menu make sure Jurkat_48x_FCB2_timeslice is selected (FCB stands for 
 fluorescent cell barcode). The FCB population menu is used to choose from any gated 
 populations that were defined on Cytobank prior to importing the experiment. Similarly 
-the Comp Matrix drop down allows you to specify a specific compensation matrix to use.
+the Comp Matrix drop down allows you to specify a compensation matrix to use.
 The final two inputs that must be set are the BC1 channel and BC2 channel. In the 
 example experiment the Pacific Orange and Pacific Blue channels were used to encode 
 the barcoding information. Clicking the Done button returns a plot of all measured cells that
