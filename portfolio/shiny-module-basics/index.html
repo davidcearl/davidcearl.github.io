@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Shiny Module Basics</title>
+<meta name="description" content="R and shiny based data analysis and projects">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="all,follow">
+<meta name="googlebot" content="index,follow,snippet,archive">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,300,700,400italic">
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/owl.carousel.css">
+<link rel="stylesheet" href="/css/owl.theme.css">
+
+
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+
+ 
+
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+
+<link href="/css/custom.css" rel="stylesheet">
+<link rel="shortcut icon" href="/img/favicon.png">
+
+
+</head>
+<body>
+  <div id="all">
+      <div class="container-fluid">
+          <div class="row row-offcanvas row-offcanvas-left">
+              <div id="sidebar" class="col-xs-6 col-sm-4 col-md-3 sidebar-offcanvas">
+  <div class="sidebar-content">
+    <h1 class="sidebar-heading"><a href="/">endeavouRs</a></h1>
+    
+      <p class="sidebar-p">I am a scientist and tinkerer currently based in Nashville</p>
+    
+    <ul class="sidebar-menu">
+      
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/about/">About</a></li>
+      
+    </ul>
+    <p class="social">
+  
+  
+  
+  
+  
+  <a href="mailto:davidcearl@gmail.com" data-animate-hover="pulse" class="email">
+    <i class="fa fa-envelope"></i>
+  </a>
+  
+  
+  <a href="full%20profile%20url%20in%20linkedin" data-animate-hover="pulse">
+    <i class="fa fa-linkedin"></i>
+  </a>
+  
+  
+  
+  <a href="https://github.com/davidcearl/" data-animate-hover="pulse">
+    <i class="fa fa-github"></i>
+  </a>
+  
+</p>
+
+
+    <div class="copyright">
+      <p class="credit">
+        
+          &copy;2017 David Earl
+          
+      </p>
+    </div>
+  </div>
+  <div class="attribution">
+    <p class='creators'>
+      Template by <a href="https://bootstrapious.com/free-templates" class="external">Bootstrapious.com</a>
+<br>
+
+Ported to Hugo by <a href="https://github.com/kishaningithub">Kishan B</a>
+
+    </p>
+  </div>
+</div>
+
+
+
+              
+<div class="col-xs-12 col-sm-8 col-md-9 content-column white-background">
+  <div class="small-navbar visible-xs">
+  <button type="button" data-toggle="offcanvas" class="btn btn-ghost pull-left"> <i class="fa fa-align-left"> </i>Menu</button>
+  <h1 class="small-navbar-heading"><a href="/">endeavouRs</a></h1>
+</div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="content-column-content">
+         <h1>Shiny Module Basics</h1>
+         <p><strong>Using Shiny Modules</strong></p>
+<p>Shiny modules provide a way to split complex Shiny apps into discrete functional units that can be used multiple times in a single app or reused in other apps. All input and output IDs in a Shiny app exist in the same global namespace which requires each ui and output object to have a unique id. Shiny modules use namespacing to ensure all IDs are unique. Each module consits of a ui function and a server function similiar to the standard Shiny app ui and server functions.</p>
+<p>The first argument to a module ui function must be the id for the module, which is used to define the module namespace. The module server function is called from the main server function using <code>shiny::callModule()</code>. The first arguement to callModule is the module server function and the second arguement is the same id used for the module ui.</p>
+<p>Within the ui function, the first line should create a namespace function using <code>shiny::NS(id)</code> where id is the module id arguement. The <code>shiny::tagList()</code> function should then be used to add ui components. Each module ui component’s inputId arguement must be wrapped with the namespace function.</p>
+<pre class="r"><code>moduleUI &lt;- function(id) {
+  ns &lt;- NS(id)
+  tagList(
+    *Input(ns(&quot;inputID&quot;))
+  )
+}</code></pre>
+<hr />
+<div class="figure">
+<img src="/img/portfolio/shiny_module_figure.png" />
+
+</div>
+
+         
+      </div>
+    </div>
+  </div>
+</div>
+
+          </div>
+      </div>
+  </div>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/jquery.cookie.js"> </script>
+<script src="/js/ekko-lightbox.js"></script>
+<script src="/js/jquery.scrollTo.min.js"></script>
+<script src="/js/masonry.pkgd.min.js"></script>
+<script src="/js/imagesloaded.pkgd.min.js"></script>
+<script src="/js/owl.carousel.min.js"></script>
+<script src="/js/front.js"></script>
+
+</body>
+</html>
