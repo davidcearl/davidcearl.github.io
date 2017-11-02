@@ -7,10 +7,19 @@
     <generator>Hugo -- gohugo.io</generator>
     <language>en-us</language>
     <copyright>&amp;copy;2017 David Earl</copyright>
-    <lastBuildDate>Sun, 15 Oct 2017 00:00:00 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 01 Oct 2017 00:00:00 +0000</lastBuildDate>
     
 	<atom:link href="/portfolio/index.xml" rel="self" type="application/rss+xml" />
     
+    
+    <item>
+      <title>Shiny modules all the way down</title>
+      <link>/portfolio/shiny-modules-all-the-way-down/</link>
+      <pubDate>Sun, 01 Oct 2017 00:00:00 +0000</pubDate>
+      
+      <guid>/portfolio/shiny-modules-all-the-way-down/</guid>
+      <description>As you begin using modules in your Shiny app, you will likely want to access reactive values from one module in a different module. There might also be instances where you want to use a module within another module and return reactive objects from the inner module to be used in the outer module. There are no limits to how many levels of module nesting you can have but some restraint should be used to maintain clairity.</description>
+    </item>
     
     <item>
       <title>Shiny Module Basics</title>

@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head><meta charset="utf-8">
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>Shiny modules all the way down</title>
+<meta name="description" content="R and shiny based data analysis and projects">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="all,follow">
+<meta name="googlebot" content="index,follow,snippet,archive">
+<link rel="stylesheet" href="/css/bootstrap.min.css">
+<link rel="stylesheet" href="//fonts.googleapis.com/css?family=Roboto:400,300,700,400italic">
+<link rel="stylesheet" href="/css/font-awesome.min.css">
+<link rel="stylesheet" href="/css/owl.carousel.css">
+<link rel="stylesheet" href="/css/owl.theme.css">
+
+
+  <link href="/css/style.default.css" rel="stylesheet" id="theme-stylesheet">
+
+ 
+
+  
+    <!--[if lt IE 9]>
+        <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+        <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+  
+
+
+<link href="/css/custom.css" rel="stylesheet">
+<link rel="shortcut icon" href="/img/favicon.png">
+
+
+</head>
+<body>
+  <div id="all">
+      <div class="container-fluid">
+          <div class="row row-offcanvas row-offcanvas-left">
+              <div id="sidebar" class="col-xs-6 col-sm-4 col-md-3 sidebar-offcanvas">
+  <div class="sidebar-content">
+    <h1 class="sidebar-heading"><a href="/">endeavouRs</a></h1>
+    
+      <p class="sidebar-p">I am a scientist and tinkerer currently based in Nashville</p>
+    
+    <ul class="sidebar-menu">
+      
+      
+        <li><a href="/">Home</a></li>
+      
+        <li><a href="/about/">About</a></li>
+      
+    </ul>
+    <p class="social">
+  
+  
+  
+  
+  
+  <a href="mailto:davidcearl@gmail.com" data-animate-hover="pulse" class="email">
+    <i class="fa fa-envelope"></i>
+  </a>
+  
+  
+  <a href="full%20profile%20url%20in%20linkedin" data-animate-hover="pulse">
+    <i class="fa fa-linkedin"></i>
+  </a>
+  
+  
+  
+  <a href="https://github.com/davidcearl/" data-animate-hover="pulse">
+    <i class="fa fa-github"></i>
+  </a>
+  
+</p>
+
+
+    <div class="copyright">
+      <p class="credit">
+        
+          &copy;2017 David Earl
+          
+      </p>
+    </div>
+  </div>
+  <div class="attribution">
+    <p class='creators'>
+      Template by <a href="https://bootstrapious.com/free-templates" class="external">Bootstrapious.com</a>
+<br>
+
+Ported to Hugo by <a href="https://github.com/kishaningithub">Kishan B</a>
+
+    </p>
+  </div>
+</div>
+
+
+
+              
+<div class="col-xs-12 col-sm-8 col-md-9 content-column white-background">
+  <div class="small-navbar visible-xs">
+  <button type="button" data-toggle="offcanvas" class="btn btn-ghost pull-left"> <i class="fa fa-align-left"> </i>Menu</button>
+  <h1 class="small-navbar-heading"><a href="/">endeavouRs</a></h1>
+</div>
+
+  <div class="row">
+    <div class="col-lg-8">
+      <div class="content-column-content">
+         <h1>Shiny modules all the way down</h1>
+         <p>As you begin using modules in your Shiny app, you will likely want to access reactive values from one module in a different module. There might also be instances where you want to use a module within another module and return reactive objects from the inner module to be used in the outer module. There are no limits to how many levels of module nesting you can have but some restraint should be used to maintain clairity. To illustrate how reactive values can be used between modules and how shiny NS functions work consider the following (albeit somewhat contrived) example.</p>
+<pre class="r"><code># module 1
+module_1_UI &lt;- function(id) {
+  ns &lt;- NS(id)
+  tagList(
+    p(&#39;module 1 sliderInput&#39;),
+    sliderInput(ns(&#39;test_input&#39;), &#39;slider&#39;, 1, 5, 1, 1),
+    p(&#39;module 1 sliderInput value output&#39;),
+    verbatimTextOutput(ns(&#39;test_out&#39;))
+  )
+}
+
+module_1 &lt;- function(input, output, session) {
+  output$test_out &lt;- renderPrint({
+    input$test_input
+  }) 
+}
+
+# ------------------------------------------------------------------------------
+# module 2
+module_2_UI &lt;- function(id) {
+  ns &lt;- NS(id)
+  tagList(
+    module_1_UI(ns(&#39;yellow&#39;)),
+    p(&#39;module 2 sliderInput value output&#39;),
+    p(&#39;modlue 2 ui output is wrapped with ns()&#39;),
+    verbatimTextOutput(ns(&#39;test_out&#39;))
+  )
+}
+
+module_2 &lt;- function(input, output, session) {
+  callModule(module_1, &#39;yellow&#39;)
+  output$test_out &lt;- renderPrint({
+    session$input$`yellow-test_input`
+  }) 
+}
+
+# ------------------------------------------------------------------------------
+# module 3
+module_3_UI &lt;- function(id){
+  ns &lt;- NS(id)
+  tagList(
+    module_2_UI(ns(&#39;orange&#39;)),
+    p(&#39;module 3 sliderInput value output&#39;),
+    p(&#39;modlue 3 ui ouput is manually prefixed&#39;),
+    verbatimTextOutput(&#39;red-test_out&#39;)
+  )
+}
+
+module_3 &lt;- function(input, output, session) {
+  callModule(module_2, &#39;orange&#39;)
+  output$test_out &lt;- renderPrint({
+    session$input$`orange-yellow-test_input`
+  }) 
+}
+# ------------------------------------------------------------------------------
+# shiny app ui
+ui &lt;- fluidPage(
+  h1(&#39;Chaining Modules&#39;),
+  module_3_UI(&#39;red&#39;),
+  p(&#39;main app sliderInput value output&#39;),
+  p(&#39;the rendered input is manually prefixed with each module namespace&#39;),
+  verbatimTextOutput(&#39;test_out&#39;)
+)
+
+# ------------------------------------------------------------------------------
+# shiny app server
+server &lt;- function(input, output, session) {
+  callModule(module_3, &#39;red&#39;)
+  output$test_out &lt;- renderPrint({
+    session$input$`red-orange-yellow-test_input`
+  })
+}
+
+# launch app
+shinyApp(ui, server)</code></pre>
+<p>As you can see in panel a) the NS function simply prefixes the namespace ID argument to <code>callModule()</code> to the module and ui input and output IDs. You can access nested values by simply appending the prefix yourself. This also works for the ui id as shown for the <code>module_3_UI</code> function higlighted in panel b)</p>
+<div class="figure">
+<img src="/img/portfolio/nested_modules.png" />
+
+</div>
+<p>Of course this invalidates most of the motivations for using modules in the first place. A better choice is to have inner modules return reactive values if you want to use them in the outer module and/or pass them to subsequent modules using optional arguments to <code>callModule()</code></p>
+<pre class="r"><code>module_1 &lt;- function(input, output, session) {
+  output$test_out &lt;- renderPrint({
+    input$test_input
+  })
+  return(reactive(input$test_input))
+}
+
+module_2 &lt;- function(input, output, session) {
+  mod1 &lt;- callModule(module_1, &#39;yellow&#39;)
+  output$test_out &lt;- renderPrint({
+    mod1()
+  })
+}</code></pre>
+<p>In the case of passing reactive objects between modules, I like to used named lists. In the example below, The main server function calls <code>module_5</code> which calls <code>module_4</code> and <code>module_6</code>. <code>module_4</code> returns two reactive objects which are then passed to <code>module_6</code> and used to render ouptut.</p>
+<pre class="r"><code># ------------------------------------------------------------------------------
+# module 4
+module_4_UI &lt;- function(id) {
+  ns &lt;- NS(id)
+  tagList(
+    sliderInput(ns(&#39;num&#39;), &#39;num&#39;, 1, 10, 1, 1),
+    sliderInput(ns(&#39;num_2&#39;), &#39;num 2&#39;, 1, 10, 1, 1)
+  )
+}
+
+module_4 &lt;- function(input, output, session) {
+  dist_1 &lt;- eventReactive(input$num, {
+    rnorm(input$num)
+  })
+  dist_2 &lt;- eventReactive(input$num_2, {
+    rnorm(input$num_2)
+  })
+  return(list(&#39;d1&#39; = dist_1, &#39;d2&#39; = dist_2))
+}
+
+# ------------------------------------------------------------------------------
+# module 5
+module_5_UI &lt;- function(id) {
+  ns &lt;- NS(id)
+  tagList(
+    module_4_UI(ns(&#39;four&#39;)),
+    module_6_UI(ns(&#39;six&#39;))
+  )
+}
+
+module_5 &lt;- function(input, output, session) {
+  reactive_dists &lt;- callModule(module_4, &#39;four&#39;)
+  callModule(module_6, &#39;six&#39;, reactive_dists)
+}
+
+# ------------------------------------------------------------------------------
+# module 6
+module_6 &lt;- function(input, output, session, reactive_dists) {
+  output$dist1 &lt;- renderPrint({
+    reactive_dists[[&#39;d1&#39;]]()
+  })
+  output$dist2 &lt;- renderPrint({
+    reactive_dists[[&#39;d2&#39;]]()
+  })
+}
+
+module_6_UI &lt;- function(id) {
+  ns &lt;- NS(id)
+  tagList(
+    verbatimTextOutput(ns(&#39;dist1&#39;)),
+    verbatimTextOutput(ns(&#39;dist2&#39;))
+  )
+}
+
+# ------------------------------------------------------------------------------
+# shiny app ui
+ui &lt;- fluidPage(
+  module_5_UI(&#39;five&#39;)
+)
+
+# ------------------------------------------------------------------------------
+# shiny app server
+server &lt;- function(input, output, session) {
+  callModule(module_5, &#39;five&#39;)
+}
+
+shinyApp(ui, server)</code></pre>
+
+         
+      </div>
+    </div>
+  </div>
+</div>
+
+          </div>
+      </div>
+  </div>
+  <script src="/js/jquery.min.js"></script>
+<script src="/js/bootstrap.min.js"></script>
+<script src="/js/jquery.cookie.js"> </script>
+<script src="/js/ekko-lightbox.js"></script>
+<script src="/js/jquery.scrollTo.min.js"></script>
+<script src="/js/masonry.pkgd.min.js"></script>
+<script src="/js/imagesloaded.pkgd.min.js"></script>
+<script src="/js/owl.carousel.min.js"></script>
+<script src="/js/front.js"></script>
+
+</body>
+</html>
